@@ -2,46 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split  # import needed for the train, test, split functions.
 
-# Function for cleaning Iris Database data
-def prep_iris(df):
-    ''' 
-        This functions cleans the data by dropping unnecesssary columns, simplifying column names,
-        creating dummy columns, and concatenating the dummy df to the main df.
-    '''
-    df = df.drop(['measurement_id', 'species_id'], axis=1)
-    df = df.rename(columns={'species_name': 'species'})
-    the_dummy = pd.get_dummies(df[['species']], dummy_na=False, drop_first=False)
-    df = pd.concat([df, the_dummy], axis=1)
-    return df
-
-# Function for cleaning Titanic data
-def prep_titanic(titanic):
-    ''' 
-        This functions cleans the data by dropping unnecesssary columns, filling null values,
-        creating dummy columns, and concatenating the dummy df to the main df.
-    '''
-    titanic= titanic.drop(['class', 'deck','age', 'passenger_id','embarked'], axis=1)
-    titanic['embark_town'] = titanic['embark_town'].fillna(value='Southhampton')
-    them_dummies = pd.get_dummies(titanic[['sex', 'embark_town']], dummy_na=False)
-    titanic = pd.concat([titanic, them_dummies], axis=1)
-    return titanic
-
-# Function for cleaning Telco data
-def prep_telco(telco):
-    ''' 
-        This functions cleans the data by dropping dupes, dropping unnecesssary columns,
-         simplifying column names, creating dummy columns, and concatenating 
-         the dummy df to the main df.
-    '''
-    telco = telco.drop_duplicates()
-    telco = telco.drop(['customer_id','payment_type_id','internet_service_type_id', 'contract_type_id'], axis=1)
-    telco_dummies = pd.get_dummies(telco[['contract_type','internet_service_type','payment_type']], dummy_na=False, drop_first=True)
-    telco = pd.concat([telco, telco_dummies], axis=1)
-    return telco
-
-
-
-
+#------------------------------------------------------------------------------------------------------------
 
 # Function for Training, Validating, and Testing the data. 
 def split_data(df, target= 'enter target column here'):
@@ -59,9 +20,7 @@ def split_data(df, target= 'enter target column here'):
     train, validate = train_test_split(train, train_size = 0.7, random_state = 123, stratify=train[target])
     return train, validate, test
 
-
-
-
+#------------------------------------------------------------------------------------------------------------
 
 # Function for Training, Validating, and Testing the data for continious data.
 def split_data_continious(df):
@@ -79,9 +38,7 @@ def split_data_continious(df):
     train, validate = train_test_split(train, train_size = 0.7, random_state = 123)
     return train, validate, test
 
-
-
-
+#------------------------------------------------------------------------------------------------------------
 
 # Function for returning scaled data
 def get_scaled(train, validate, test):
@@ -98,3 +55,72 @@ def get_scaled(train, validate, test):
     scaled_test = mm_scaler.transform(test)
     
     return scaled_train, scaled_validate, scaled_test
+
+#------------------------------------------------------------------------------------------------------------
+
+def prep_sales(df):
+    
+    '''
+    Intakes sales df and preps it by coverting to datetime dtype and setting it as the 
+    index. Creates month, day of week, and total sales columns.
+    '''
+    
+    # Converting to datetime type
+    df['sale_date'] = pd.to_datetime(df['sale_date'], infer_datetime_format=True)
+    
+    # Set date as index
+    df = df.set_index('sale_date')
+
+    # Creating date columns
+    df['month'] = df.index.month_name()
+    df['day_of_week'] = df.index.day_name()
+    
+    # Total sales column
+    df['sales_total'] = df['sale_amount'] * df['item_price']
+    
+    return df
+
+#------------------------------------------------------------------------------------------------------------
+
+def prep_sales(df):
+    
+    '''
+    Intakes sales df and preps it by coverting to datetime dtype and setting it as the 
+    index. Creates month, day of week, and total sales columns.
+    '''
+    
+    # Converting to datetime type
+    df['sale_date'] = pd.to_datetime(df['sale_date'], infer_datetime_format=True)
+    
+    # Set date as index and sort 
+    df = df.set_index('sale_date')
+    df = df.sort_index()
+
+    # Creating date columns
+    df['month'] = df.index.month
+    df['day_of_week'] = df.index.day_of_week
+    
+    # Total sales column
+    df['total_sales'] = df['sale_amount'] * df['item_price']
+    
+    return df
+
+#------------------------------------------------------------------------------------------------------------
+
+def prep_ops(df):
+
+
+    # Format date to datetime dtype
+    df['Date'] = pd.to_datetime(df.Date)
+
+    # Set date as index
+    df = df.set_index('Date')
+    df = df.sort_index()
+
+    # Create month and year columns
+    df['month'] = df.index.month
+    df['year'] = df.index.year
+
+    return df
+
+#------------------------------------------------------------------------------------------------------------
